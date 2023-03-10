@@ -1,0 +1,61 @@
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TRANSACTION_ROSE`()
+BEGIN
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+ROLLBACK;
+resignal;
+END;                
+START TRANSACTION;
+UPDATE BankAccounts
+SET Balance = Balance-200
+WHERE AccountName = 'Rose';
+       
+UPDATE BankAccounts
+SET Balance = Balance+200
+WHERE AccountName = 'Shoe Shop';
+       
+UPDATE ShoeShop
+SET Stock = Stock-1
+WHERE Product = 'Boots';
+
+commit; 
+
+UPDATE BankAccounts
+SET Balance = Balance-300
+WHERE AccountName = 'Rose';
+       
+    
+   
+END$$
+DELIMITER ;
+
+
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UPDATE_LEADERS_SCORE`(IN IN_School_ID int, in IN_Leaders_Score int )
+begin 
+DECLARE EXIT HANDLER FOR SQLSTATE '42000'
+SELECT 'Leaders_Score out of range.';
+IF IN_Leaders_Score > 99 or IN_Leaders_Score < 0 THEN CALL raise_error;
+end if; 
+begin
+rollback ;
+end; 
+start transaction ;
+update chicago_public_schools
+set
+Leaders_Icon = case when IN_Leaders_Score between 0 and 19 then 'very weak' 
+                    when IN_Leaders_Score between 20 and 39 then 'weak' 
+					when IN_Leaders_Score between 40 and 59 then 'average' 
+					when IN_Leaders_Score between 60 and 79 then 'strong' 
+                    when IN_Leaders_Score between 80 and 99 then 'very strong'
+end,
+Leaders_Score = IN_Leaders_Score 
+where school_id = IN_School_ID;
+commit; 
+end$$
+DELIMITER ;
+
+
+
